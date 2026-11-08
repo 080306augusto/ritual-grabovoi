@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Programa Guiado 21 Días</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --oro: #ffd678; --tinta: #140f24; --vio: #3a2483; --verde: #22c55e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, sans-serif; color: #fff; background: radial-gradient(circle at 50% 0%, #4b3790, #140f24 60%) fixed; min-height: 100vh; }
+  .w { max-width: 560px; margin: 0 auto; padding: 22px 16px 60px; }
+  h1, h2 { font-family: "Cormorant Garamond", serif; margin: 0; line-height: 1.1; }
+  h1 { font-size: 32px; color: var(--oro); text-align: center; }
+  .sub { text-align: center; opacity: .8; font-size: 14px; margin: 6px 0 20px; }
+  .card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 18px; padding: 18px; margin-bottom: 14px; }
+  .objs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .objs button, .btn { border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #fff; border-radius: 14px; padding: 14px 10px; font: 600 15px Inter; cursor: pointer; }
+  .objs button.sel { background: var(--oro); color: var(--tinta); border-color: var(--oro); }
+  .btn.go { width: 100%; background: linear-gradient(180deg, #ffe7a3, #e9b543); color: var(--tinta); border: 0; font-weight: 800; font-size: 17px; padding: 16px; }
+  .btn.sec { width: 100%; margin-top: 8px; }
+  .prog { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .barra { flex: 1; height: 8px; border-radius: 99px; background: rgba(255,255,255,.12); overflow: hidden; }
+  .barra i { display: block; height: 100%; background: linear-gradient(90deg, #ffd678, #22c55e); }
+  .dias { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 12px; }
+  .dias button { aspect-ratio: 1; border-radius: 10px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.05); color: #fff; font: 700 15px Inter; cursor: pointer; position: relative; }
+  .dias button.ok { background: rgba(34,197,94,.25); border-color: var(--verde); }
+  .dias button.ok::after { content: "✓"; position: absolute; top: 1px; right: 4px; font-size: 10px; color: var(--verde); }
+  .dias button.hoy { outline: 2px solid var(--oro); }
+  .sem { font-size: 11px; letter-spacing: .15em; text-transform: uppercase; color: var(--oro); margin: 14px 0 4px; }
+  .tag { display: inline-block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--oro); }
+  .dia h2 { font-size: 28px; margin: 4px 0 8px; }
+  .dia p { line-height: 1.55; opacity: .92; margin: 0 0 10px; }
+  .cod { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,.25); border-radius: 12px; padding: 10px 14px; margin: 8px 0; }
+  .cod b { font: 700 22px "Cormorant Garamond", serif; color: var(--oro); letter-spacing: .05em; }
+  .cod small { opacity: .7; font-size: 12px; }
+  .accion { border-left: 3px solid var(--verde); background: rgba(34,197,94,.08); padding: 10px 12px; border-radius: 0 10px 10px 0; font-size: 14.5px; }
+  /* sesión */
+  .ses { position: fixed; inset: 0; background: radial-gradient(circle at 50% 40%, #4b3790, #0d0a17 70%); display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; z-index: 10; }
+  .ses.on { display: flex; }
+  .fase { font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--oro); margin-bottom: 18px; }
+  .orbe { width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle, rgba(255,214,120,.55), rgba(255,214,120,.05) 70%); transition: transform 4s ease-in-out; display: grid; place-items: center; font: 700 18px Inter; }
+  .orbe.grande { transform: scale(1.35); }
+  .digs { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 10px 0; }
+  .digs span { width: 36px; height: 50px; border-radius: 8px; display: grid; place-items: center; font: 700 30px "Cormorant Garamond", serif; background: rgba(255,255,255,.07); color: rgba(255,255,255,.6); transition: all .2s; }
+  .digs span.esp { width: 8px; background: none; }
+  .digs span.on { background: var(--oro); color: var(--tinta); box-shadow: 0 0 22px rgba(255,214,120,.8); transform: scale(1.08); }
+  .texto { max-width: 420px; font-size: 17px; line-height: 1.5; min-height: 80px; margin: 18px 0; font-style: italic; }
+  .cont { font-size: 13px; opacity: .75; }
+  .salir { position: absolute; top: 16px; right: 16px; background: none; border: 1px solid rgba(255,255,255,.25); color: #fff; border-radius: 99px; padding: 6px 14px; cursor: pointer; }
+  .ops { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+  .ops label { font-size: 13px; opacity: .85; display: flex; gap: 6px; align-items: center; }
+  .oculto { display: none; }
+</style>
+</head>
+<body>
+<div class="w">
+  <h1>Programa Guiado 21 Días</h1>
+  <p class="sub">Una sesión guiada por día · voz, respiración, decreto y repeticiones</p>
+
+  <div class="card" id="inicio">
+    <p style="margin:0 0 12px;font-weight:600">¿Cuál es tu objetivo para estos 21 días?</p>
+    <div class="objs" id="objs"></div>
+    <p style="font-size:13px;opacity:.7;margin:12px 0 0">Puedes cambiarlo después. Recomendamos un solo objetivo por ciclo.</p>
+  </div>
+
+  <div class="card" id="panel">
+    <div class="prog"><span id="progTxt">0 de 21</span><div class="barra"><i id="progBar" style="width:0"></i></div></div>
+    <div id="dias"></div>
+  </div>
+
+  <div class="card dia" id="dia"></div>
+</div>
+
+<div class="ses" id="ses">
+  <button class="salir" id="salir">✕ Salir</button>
+  <div class="fase" id="fase">Preparación</div>
+  <div class="orbe" id="orbe"></div>
+  <div class="digs oculto" id="digs"></div>
+  <p class="texto" id="texto"></p>
+  <div class="cont" id="cont"></div>
+</div>
+
+<script>
+const OBJ = {
+  dinero:  { n: "💰 Dinero inesperado", m: ["520 741 8", "dinero inesperado"], t: ["1 884 321", "todo vuelve a su orden"], f: "Recibo nuevas oportunidades de dinero" },
+  deudas:  { n: "📉 Salir de deudas",   m: ["71 427 321 893", "orden en mis finanzas"], t: ["8 915 124", "calma mental"], f: "Ordeno mis finanzas con claridad y calma" },
+  trabajo: { n: "💼 Nuevo trabajo",     m: ["8 194 175", "éxito en el trabajo"], t: ["741", "solución rápida"], f: "Se abren puertas de trabajo para mí" },
+  amor:    { n: "❤️ Amor y pareja",     m: ["519 7148", "amor propio"], t: ["888 412 1289018", "amor y armonía"], f: "Me amo y atraigo relaciones sanas" },
+  paz:     { n: "🌙 Paz y descanso",    m: ["1 884 321", "todo vuelve a la normalidad"], t: ["514 248 538", "dormir mejor"], f: "Mi mente está en calma y en orden" },
+  abund:   { n: "🌟 Abundancia",        m: ["318 798", "abundancia y prosperidad"], t: ["545", "regalos del universo"], f: "La abundancia fluye en mi vida" },
+};
+// d: título · p: práctica · r: repeticiones · s: "m" mañana / "t" noche · a: acción
+const DIAS = [
+  ["Intención", "Escribe tu objetivo en una frase en presente y léela en voz alta.", 9, "m", "Escribe tu frase en un papel y llévalo contigo todo el día."],
+  ["Respiración", "Cinco minutos de respiración consciente antes de activar.", 21, "m", "Haz 3 respiraciones profundas cada vez que mires el celular."],
+  ["Gratitud", "Agradece 10 cosas que ya tienes en el área de tu objetivo.", 9, "m", "Anota 10 cosas por las que estás agradecido hoy."],
+  ["La esfera", "Visualiza una esfera dorada con tu código dentro.", 21, "m", "Antes de dormir, recuerda la esfera durante un minuto."],
+  ["Acción", "Hoy la práctica viene con una acción concreta antes de las 18 h.", 21, "m", "Haz UNA acción concreta hacia tu objetivo antes de las 18 h."],
+  ["El agua", "Ritual del vaso de agua: escribe el código bajo el vaso y bébelo con gratitud.", 9, "m", "Bebe el agua con la intención puesta en tu objetivo."],
+  ["Revisión", "Primera semana completa. Mira tus señales y cómo te sientes.", 9, "t", "Escribe 3 cambios, aunque sean pequeños, que notaste esta semana."],
+  ["108", "Primera práctica larga: 108 repeticiones.", 108, "m", "Hoy evita quejarte en voz alta durante todo el día."],
+  ["Soltar", "Identifica una creencia que te limita y reemplázala.", 21, "t", "Escribe la creencia vieja, táchala y escribe la nueva."],
+  ["En la piel", "Escribe el código en tu muñeca y respira cada vez que lo veas.", 9, "m", "Cada vez que veas el código en tu muñeca, respira y agradece."],
+  ["Noche", "Ritual nocturno de calma con tu código de apoyo.", 21, "t", "Apaga las pantallas 30 minutos antes de dormir."],
+  ["Acción doble", "Dos acciones concretas hacia tu objetivo.", 21, "m", "Haz DOS acciones concretas hacia tu objetivo hoy."],
+  ["Silencio", "Visualización en silencio: solo la esfera y los números.", 9, "t", "Pasa 10 minutos sin pantallas ni ruido."],
+  ["Revisión", "Dos semanas. Compara cómo te sentías el día 1 y hoy.", 9, "t", "Escribe qué cambió en tu forma de pensar sobre tu objetivo."],
+  ["Como si ya fuera", "Describe tu vida con el objetivo cumplido.", 21, "m", "Escribe un párrafo describiendo tu vida con el objetivo cumplido."],
+  ["Generosidad", "Da algo hoy: tiempo, ayuda o un pequeño regalo.", 21, "m", "Ayuda a alguien sin esperar nada a cambio."],
+  ["108", "Segunda práctica larga: 108 repeticiones.", 108, "m", "Hoy repite tu frase de intención 3 veces en voz alta."],
+  ["Señales", "Presta atención a coincidencias, ideas y oportunidades.", 21, "m", "Anota cada coincidencia u oportunidad que aparezca hoy."],
+  ["Acción valiente", "Haz eso que vienes postergando.", 21, "m", "Haz la acción valiente que vienes postergando."],
+  ["Gratitud anticipada", "Agradece como si tu objetivo ya estuviera cumplido.", 21, "t", "Agradece en voz alta como si ya lo hubieras recibido."],
+  ["Cierre", "Día 21. Cierre del ciclo y gratitud por el camino recorrido.", 21, "t", "Lee tus notas de los 21 días y decide tu próximo objetivo."],
+];
+const KEY = "programa21";
+let st = { obj: null, hechos: [] };
+try { st = { ...st, ...JSON.parse(localStorage.getItem(KEY) || "{}") }; } catch (e) {}
+const SIMPLE = new URLSearchParams(location.search).has("simple");
+if (SIMPLE) { st.obj = "abund"; }
+const guardar = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+const $ = (id) => document.getElementById(id);
+let sel = 0;
+
+function render() {
+  if (SIMPLE) $("inicio").style.display = "none";
+  $("objs").innerHTML = Object.entries(OBJ).map(([k, o]) => `<button data-k="${k}" class="${st.obj === k ? "sel" : ""}">${o.n}</button>`).join("");
+  $("panel").style.display = $("dia").style.display = st.obj ? "" : "none";
+  if (!st.obj) return;
+  const n = st.hechos.length;
+  $("progTxt").textContent = `${n} de 21`; $("progBar").style.width = `${n / 21 * 100}%`;
+  const hoy = DIAS.findIndex((_, i) => !st.hechos.includes(i));
+  let h = "";
+  ["Semana 1 · Abrir", "Semana 2 · Profundizar", "Semana 3 · Recibir"].forEach((t, s) => {
+    h += `<div class="sem">${t}</div><div class="dias">` + DIAS.slice(s * 7, s * 7 + 7).map((_, j) => { const i = s * 7 + j; return `<button data-i="${i}" class="${st.hechos.includes(i) ? "ok" : ""} ${i === hoy ? "hoy" : ""}">${i + 1}</button>`; }).join("") + `</div>`;
+  });
+  $("dias").innerHTML = h;
+  pintarDia();
+}
+function codDe(i) { const o = OBJ[st.obj], d = DIAS[i]; return d[3] === "m" ? o.m : o.t; }
+function pintarDia() {
+  const d = DIAS[sel], [num, para] = codDe(sel), hecho = st.hechos.includes(sel);
+  $("dia").innerHTML = `<span class="tag">Día ${sel + 1} · ${d[3] === "m" ? "Práctica de la mañana" : "Práctica de la noche"}</span>
+    <h2>${d[0]}</h2><p>${d[1]}</p>
+    <div class="cod"><div><small>Código del día</small><br><b>${num}</b></div><small>${para}<br>${d[2]} repeticiones</small></div>
+    <div class="accion"><b>Acción del día:</b> ${d[4]}</div>
+    <button class="btn go" id="empezar" style="margin-top:14px">▶ Empezar sesión guiada (${Math.round((60 + d[2] * num.replace(/ /g, "").length * (d[2] > 21 ? .3 : .75)) / 60) + 2} min)</button>
+    <button class="btn sec" id="marcar">${hecho ? "✓ Día completado — desmarcar" : "Marcar como completado"}</button>`;
+  $("empezar").onclick = () => sesion(sel);
+  $("marcar").onclick = () => { st.hechos = hecho ? st.hechos.filter((x) => x !== sel) : [...st.hechos, sel]; guardar(); render(); };
+}
+$("objs").onclick = (e) => { const k = e.target.dataset.k; if (!k) return; st.obj = k; guardar(); sel = DIAS.findIndex((_, i) => !st.hechos.includes(i)); if (sel < 0) sel = 20; render(); };
+$("dias").onclick = (e) => { const i = e.target.dataset.i; if (i == null) return; sel = +i; pintarDia(); $("dia").scrollIntoView({ behavior: "smooth" }); };
+
+// ---- sesión guiada ----
+let vivo = false;
+const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+function voz(t) {
+  return new Promise((res) => {
+    if (!("speechSynthesis" in window)) return res();
+    const u = new SpeechSynthesisUtterance(t); u.lang = "es-MX"; u.rate = .88;
+    const v = speechSynthesis.getVoices().find((x) => x.lang.startsWith("es")); if (v) u.voice = v;
+    u.onend = res; u.onerror = res; speechSynthesis.speak(u);
+  });
+}
+async function decir(fase, t) { if (!vivo) return; $("fase").textContent = fase; $("texto").textContent = t; await voz(t); await espera(500); }
+const NOM = ["cero", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
+async function sesion(i) {
+  vivo = true; $("ses").classList.add("on"); $("digs").classList.add("oculto"); $("orbe").classList.remove("oculto"); $("cont").textContent = "";
+  const d = DIAS[i], [num, para] = codDe(i), o = OBJ[st.obj];
+  await decir("Preparación", `Día ${i + 1}: ${d[0]}. Busca un lugar tranquilo, siéntate con la espalda recta y pon el celular en silencio.`);
+  await decir("Preparación", d[1]);
+  // respiración 4-6
+  for (let r = 1; r <= 4 && vivo; r++) {
+    $("fase").textContent = "Respiración"; $("cont").textContent = `Respiración ${r} de 4`;
+    $("orbe").classList.add("grande"); $("orbe").textContent = "Inhala"; $("texto").textContent = "Inhala profundo por la nariz…"; if (r === 1) voz("Inhala"); await espera(4000);
+    $("orbe").classList.remove("grande"); $("orbe").textContent = "Exhala"; $("texto").textContent = "…y exhala despacio por la boca."; if (r === 1) voz("Exhala"); await espera(6000);
+  }
+  $("cont").textContent = ""; $("orbe").textContent = "";
+  await decir("Decreto", `Repite conmigo: Con todo el poder de mi intención activo el código ${num} para ${para}, para mi más alto bien y el de todos, bajo la gracia y de manera perfecta.`);
+  // repeticiones
+  $("orbe").classList.add("oculto"); $("digs").classList.remove("oculto");
+  $("digs").innerHTML = [...num].map((c) => c === " " ? `<span class="esp"></span>` : `<span>${c}</span>`).join("");
+  const cajas = [...$("digs").querySelectorAll("span:not(.esp)")], rapido = d[2] > 21;
+  $("fase").textContent = "Activación"; $("texto").textContent = rapido ? "Sigue los números con la mirada y repítelos en tu mente." : "Repite cada número en voz baja.";
+  for (let r = 1; r <= d[2] && vivo; r++) {
+    $("cont").textContent = `Repetición ${r} de ${d[2]}`;
+    for (const c of cajas) { if (!vivo) break; c.classList.add("on"); if (!rapido && r <= 3) voz(NOM[+c.textContent]); await espera(rapido ? 260 : 700); c.classList.remove("on"); }
+    await espera(rapido ? 250 : 800);
+  }
+  $("digs").classList.add("oculto"); $("orbe").classList.remove("oculto"); $("cont").textContent = "";
+  await decir("Cierre", "El código ha sido activado. Hecho está. Gracias, gracias, gracias.");
+  await decir("Intención", `Repite tu frase: ${o.f}.`);
+  await decir("Acción del día", d[4]);
+  if (vivo) { if (!st.hechos.includes(i)) { st.hechos.push(i); guardar(); } await decir("Día completado ✦", `Muy bien. Completaste el día ${i + 1}. Nos vemos mañana.`); await espera(1500); }
+  cerrar();
+}
+function cerrar() { vivo = false; try { speechSynthesis.cancel(); } catch (e) {} $("ses").classList.remove("on"); render(); }
+$("salir").onclick = cerrar;
+sel = Math.max(0, DIAS.findIndex((_, i) => !st.hechos.includes(i)));
+render();
+</script>
+</body>
+</html>
