@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activador de Códigos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --oro: #e7c977; --tinta: #1f1a2e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, sans-serif; color: #fff; background: radial-gradient(circle at 50% 30%, #4b3790, #1f1a2e 70%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 18px; }
+  .app { width: 100%; max-width: 520px; text-align: center; }
+  h1 { font-family: "Cormorant Garamond", serif; font-size: 30px; margin: 0 0 4px; color: var(--oro); }
+  .obj { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--oro); margin-bottom: 14px; }
+  select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08); color: #fff; font-size: 15px; margin-bottom: 16px; }
+  select option { color: #111; }
+  .esfera { position: relative; margin: 6px auto 18px; width: 100%; aspect-ratio: 1.6; border-radius: 20px; background: radial-gradient(circle at 50% 50%, rgba(231,201,119,.18), rgba(255,255,255,.03) 65%); border: 1px solid rgba(231,201,119,.25); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+  .digitos { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding: 0 10px; }
+  .d { width: 38px; height: 52px; border-radius: 8px; display: grid; place-items: center; font-family: "Cormorant Garamond", serif; font-size: 32px; font-weight: 700; background: rgba(255,255,255,.06); color: rgba(255,255,255,.55); transition: all .25s; }
+  .d.esp { width: 12px; background: none; }
+  .d.on { background: var(--oro); color: var(--tinta); box-shadow: 0 0 22px rgba(231,201,119,.8); transform: scale(1.08); }
+  .cont { font-size: 13px; opacity: .85; }
+  .reps { display: flex; gap: 6px; justify-content: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .reps button, .op { border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.06); color: #fff; border-radius: 99px; padding: 8px 14px; font-weight: 600; cursor: pointer; font-size: 14px; }
+  .reps button.sel { background: var(--oro); color: var(--tinta); border-color: var(--oro); }
+  .ops { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .op.sel { border-color: var(--oro); color: var(--oro); }
+  .go { width: 100%; padding: 16px; border: 0; border-radius: 12px; background: linear-gradient(180deg, #f0d68e, #c9a24a); color: var(--tinta); font-weight: 700; font-size: 17px; cursor: pointer; }
+  .decreto { margin-top: 16px; font-size: 13px; font-style: italic; opacity: .8; min-height: 38px; }
+  @media (max-width: 440px) { .d { width: 30px; height: 44px; font-size: 26px; } .d.esp { width: 6px; } .digitos { gap: 4px; } }
+  body.demo { background: transparent; min-height: 0; padding: 0; }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1 id="titulo">Activador de Códigos</h1>
+  <div class="obj" id="obj">Dinero inesperado</div>
+  <select id="cod"></select>
+  <div class="esfera"><div class="digitos" id="dig"></div><div class="cont" id="cont">Elige las repeticiones y presiona activar</div></div>
+  <div class="reps" id="reps"></div>
+  <div class="ops">
+    <button class="op sel" id="voz" type="button">🔊 Voz guía</button>
+    <button class="op" id="tono" type="button">🎧 Sonido relajante</button>
+  </div>
+  <button class="go" id="go" type="button">✨ Activar código</button>
+  <p class="decreto" id="decreto"></p>
+</div>
+<script>
+const CODIGOS = [
+  ["520 741 8", "Dinero inesperado"], ["318 798", "Abundancia y prosperidad"], ["71 427 321 893", "Orden en las finanzas y deudas"],
+  ["8 194 175", "Trabajo y nuevos proyectos"], ["741", "Solución rápida"], ["520", "Código sagrado de abundancia"], ["545", "Regalos del universo"],
+  ["888 412 1289018", "Amor y pareja"], ["519 7148", "Amor propio"], ["9 788 819 719", "Reconciliación y perdón"], ["1 888 948", "Armonía familiar"],
+  ["1 884 321", "Todo vuelve a la normalidad"], ["514 248 538", "Dormir mejor"], ["8 915 124", "Calma mental"], ["71 931", "Protección"],
+];
+const demo = new URLSearchParams(location.search).has("demo");
+if (demo) { document.body.classList.add("demo"); document.getElementById("titulo").style.display = "none"; }
+const $ = (id) => document.getElementById(id);
+const lista = demo ? CODIGOS.slice(0, 1) : CODIGOS;
+$("cod").innerHTML = lista.map((c, i) => `<option value="${i}">${c[0]} — ${c[1]}</option>`).join("");
+if (demo) $("cod").style.display = "none";
+const REPS = demo ? [3, 7, 21] : [3, 7, 21, 33, 108];
+let reps = 3, voz = true, tono = false, corriendo = false, ctx, osc;
+$("reps").innerHTML = REPS.map((r) => `<button type="button" data-r="${r}" class="${r === 3 ? "sel" : ""}">${r}x</button>`).join("");
+$("reps").onclick = (e) => { const r = e.target.dataset.r; if (!r || corriendo) return; reps = +r; [...$("reps").children].forEach((b) => b.classList.toggle("sel", b.dataset.r === r)); };
+$("voz").onclick = () => { voz = !voz; $("voz").classList.toggle("sel", voz); };
+$("tono").onclick = () => { tono = !tono; $("tono").classList.toggle("sel", tono); if (!tono) pararTono(); };
+function pintar() {
+  const [num, obj] = lista[$("cod").value];
+  $("obj").textContent = obj;
+  $("dig").innerHTML = [...num].map((ch) => ch === " " ? `<span class="d esp"></span>` : `<span class="d">${ch}</span>`).join("");
+}
+$("cod").onchange = pintar; pintar();
+const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+function decir(t) { if (!voz || !("speechSynthesis" in window)) return; const u = new SpeechSynthesisUtterance(t); u.lang = "es-MX"; u.rate = 0.9; speechSynthesis.speak(u); }
+const NOMBRES = ["cero", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
+function iniciarTono() {
+  // Batido suave (binaural simple): 200 Hz en un oído y 206 Hz en el otro. Mejor con auriculares.
+  try {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const g = ctx.createGain(); g.gain.value = 0.04; g.connect(ctx.destination);
+    osc = [200, 206].map((f, i) => { const o = ctx.createOscillator(), p = ctx.createStereoPanner(); o.frequency.value = f; p.pan.value = i ? 1 : -1; o.connect(p).connect(g); o.start(); return o; });
+  } catch (e) {}
+}
+function pararTono() { try { osc?.forEach((o) => o.stop()); ctx?.close(); } catch (e) {} osc = null; }
+$("go").onclick = async () => {
+  if (corriendo) { corriendo = false; return; }
+  corriendo = true; $("go").textContent = "⏸ Detener";
+  const [num, obj] = lista[$("cod").value];
+  $("decreto").textContent = `“Con todo el poder de mi intención activo el código ${num} para ${obj.toLowerCase()}, para mi más alto bien.”`;
+  if (tono) iniciarTono();
+  decir(`Con todo el poder de mi intención activo el código ${num.split("").filter((c) => c !== " ").join(" ")}, para mi más alto bien`);
+  await espera(voz ? 5500 : 800);
+  const cajas = [...$("dig").querySelectorAll(".d:not(.esp)")];
+  const rapido = reps > 21;
+  for (let r = 1; r <= reps && corriendo; r++) {
+    $("cont").textContent = `Repetición ${r} de ${reps}`;
+    for (let i = 0; i < cajas.length && corriendo; i++) {
+      cajas[i].classList.add("on");
+      if (voz && !rapido) decir(NOMBRES[+cajas[i].textContent]);
+      await espera(rapido ? 260 : 700);
+      cajas[i].classList.remove("on");
+    }
+    await espera(rapido ? 300 : 900);
+  }
+  if (corriendo) { $("cont").textContent = "✦ Código activado ✦"; $("decreto").textContent = "“El código ha sido activado. Hecho está. Gracias, gracias, gracias.”"; decir("El código ha sido activado. Hecho está. Gracias, gracias, gracias."); }
+  else { $("cont").textContent = "Detenido"; speechSynthesis?.cancel(); }
+  pararTono(); corriendo = false; $("go").textContent = "✨ Activar código";
+};
+</script>
+</body>
+</html>
